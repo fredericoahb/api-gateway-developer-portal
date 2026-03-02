@@ -61,6 +61,8 @@ model Api {
   logs        RequestLog[]
   docs        AiGeneratedDoc[]
   insights    AiInsight[]
+  
+  violations  RateLimitViolation[]
 }
 
 model ApiKey {
