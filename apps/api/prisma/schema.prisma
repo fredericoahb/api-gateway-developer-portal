@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  DEVELOPER
+  VIEWER
+}
+
+enum ApiEnvironment {
+  DEV
+  HML
+  PRD
+}
+
+enum ApiStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ViolationType {
+  PER_MINUTE
+  PER_MONTH
+}
+
+enum InsightSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(VIEWER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Api {
+  id          String         @id @default(cuid())
+  name        String
+  version     String
+  baseUrl     String
+  environment ApiEnvironment
+  status      ApiStatus      @default(ACTIVE)
+  ownerTeam   String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  apiKeys     ApiKey[]
+  logs        RequestLog[]
+  docs        AiGeneratedDoc[]
+  insights    AiInsight[]
+}
+
+model ApiKey {
+  id             String    @id @default(cuid())
+  apiId          String
+  api            Api       @relation(fields: [apiId], references: [id])
+  name           String
+  keyPrefix      String    // first 8 chars of secret (for lookup)
+  keyHash        String    // bcrypt hash
+  limitPerMinute Int
+  limitPerMonth  Int
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  logs           RequestLog[]
+  violations     RateLimitViolation[]
+
+  @@index([apiId])
+  @@index([keyPrefix])
+}
+
+model RequestLog {
+  id        String   @id @default(cuid())
+  timestamp DateTime @default(now())
+  apiId     String
+  api       Api      @relation(fields: [apiId], references: [id])
+  apiKeyId  String
+  apiKey    ApiKey   @relation(fields: [apiKeyId], references: [id])
+
+  method    String
+  path      String
+  statusCode Int
+  latencyMs Int
+
+  ip        String?
+  userAgent String?
+
+  @@index([apiId, timestamp])
+  @@index([apiKeyId, timestamp])
+}
+
+model RateLimitViolation {
+  id           String        @id @default(cuid())
+  timestamp    DateTime      @default(now())
+  apiId        String
+  api          Api           @relation(fields: [apiId], references: [id])
+  apiKeyId     String
+  apiKey       ApiKey        @relation(fields: [apiKeyId], references: [id])
+  type         ViolationType
+  limit        Int
+  currentCount Int
+
+  @@index([apiKeyId, timestamp])
+}
+
+model AiGeneratedDoc {
+  id        String   @id @default(cuid())
+  apiId     String
+  api       Api      @relation(fields: [apiId], references: [id])
+  markdown  String
+  createdAt DateTime @default(now())
+
+  @@index([apiId, createdAt])
+}
+
+model AiInsight {
+  id         String          @id @default(cuid())
+  apiId      String
+  api        Api             @relation(fields: [apiId], references: [id])
+  rangeStart DateTime
+  rangeEnd   DateTime
+  content    String
+  severity   InsightSeverity @default(LOW)
+  createdAt  DateTime        @default(now())
+
+  @@index([apiId, createdAt])
+}

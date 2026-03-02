@@ -1,0 +1,31 @@
+{
+  "name": "api-gateway-developer-portal",
+  "private": true,
+  "packageManager": "pnpm@9.12.3",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c auto \"pnpm --filter @portal/api dev\" \"pnpm --filter @portal/web dev\"",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "format": "prettier -w .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "prettier": "^3.3.3",
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "husky": "^9.1.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fredericoahb/api-gateway-developer-portal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fredericoahb/api-gateway-developer-portal/issues"
+  },
+  "homepage": "https://github.com/fredericoahb/api-gateway-developer-portal#readme"
+}
