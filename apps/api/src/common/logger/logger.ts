@@ -1,5 +1,5 @@
 import pino, { Logger } from "pino";
-import { LoggerService } from "@nestjs/common";
+import { LoggerService, LogLevel } from "@nestjs/common";
 
 export function createLogger(): Logger {
   const isProd = process.env.NODE_ENV === "production";
@@ -8,23 +8,21 @@ export function createLogger(): Logger {
     transport: isProd
       ? undefined
       : {
-        target: "pino-pretty",
-        options: { singleLine: true, translateTime: "SYS:standard" }
-      }
+          target: "pino-pretty",
+          options: { singleLine: true, translateTime: "SYS:standard" }
+        }
   });
 }
 
-// ✅ Adapter: Nest LoggerService -> Pino
 export class PinoLogger implements LoggerService {
-  constructor(private readonly logger: Logger) { }
+  constructor(private readonly logger: Logger) {}
 
   log(message: any, ...optionalParams: any[]) {
     this.logger.info({ optionalParams }, message);
   }
 
   error(message: any, ...optionalParams: any[]) {
-    const err = optionalParams.find((p) => p instanceof Error);
-    this.logger.error({ err, optionalParams }, message);
+    this.logger.error({ optionalParams }, message);
   }
 
   warn(message: any, ...optionalParams: any[]) {
@@ -36,7 +34,12 @@ export class PinoLogger implements LoggerService {
   }
 
   verbose(message: any, ...optionalParams: any[]) {
-    // verbose no Nest -> trace no pino
     this.logger.trace({ optionalParams }, message);
+  }
+
+  setLogLevels?(levels: LogLevel[]) {
+    // opcional: Nest pode chamar isso em alguns cenários
+    // pino não usa níveis do mesmo jeito do Nest, então deixamos no-op.
+    void levels;
   }
 }
