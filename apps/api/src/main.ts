@@ -5,20 +5,17 @@ import { ValidationPipe } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import helmet from "helmet";
 import { GlobalHttpExceptionFilter } from "./common/filters/global-http-exception.filter";
-import { createLogger } from "./common/logger/logger";
+import { createLogger, PinoLogger } from "./common/logger/logger";
 
 async function bootstrap() {
+  const pino = createLogger();
+
   const app = await NestFactory.create(AppModule, {
-    logger: createLogger()
+    logger: new PinoLogger(pino) // ✅ agora é LoggerService
   });
 
   app.use(helmet());
-
-  app.enableCors({
-    origin: true,
-    credentials: true
-  });
-
+  app.enableCors({ origin: true, credentials: true });
   app.setGlobalPrefix("v1");
 
   app.useGlobalPipes(
@@ -43,7 +40,6 @@ async function bootstrap() {
 
   const port = Number(process.env.API_PORT ?? 3001);
   await app.listen(port);
-  // eslint-disable-next-line no-console
   console.log(`API listening on :${port}`);
 }
 
