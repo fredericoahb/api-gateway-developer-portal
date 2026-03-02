@@ -1,9 +1,10 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { apiBaseUrl } from "@/lib/api";
 
-export async function loginAction(formData: FormData) {
+export async function loginAction(formData: FormData): Promise<void> {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
@@ -29,9 +30,10 @@ export async function loginAction(formData: FormData) {
     path: "/"
   });
 
-  return { ok: true };
+  redirect("/dashboard"); // ✅ importante: Server Action termina com redirect (sem return objeto)
 }
 
-export async function logoutAction() {
+export async function logoutAction(): Promise<void> {
   cookies().delete("portal_token");
+  redirect("/login");
 }
