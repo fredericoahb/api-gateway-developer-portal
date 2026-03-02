@@ -30,7 +30,7 @@ export async function loginAction(formData: FormData): Promise<void> {
     path: "/"
   });
 
-  redirect("/dashboard"); // ✅ importante: Server Action termina com redirect (sem return objeto)
+  redirect("/dashboard");
 }
 
 export async function logoutAction(): Promise<void> {
