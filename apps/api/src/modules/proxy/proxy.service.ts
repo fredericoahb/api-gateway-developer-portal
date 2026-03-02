@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import axios, { AxiosRequestConfig } from "axios";
 import { ApisService } from "../apis/apis.service";
 
